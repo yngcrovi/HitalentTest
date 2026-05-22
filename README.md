@@ -67,7 +67,7 @@ source ./venv/bin/activate
 ```
 ## Установить зависимости для тестов внутри папки src
 ```console
-pip install -r requirements-test.txt
+pip install -r requirements-test.txt -r requirements.txt
 ```
 ## Запустите тесты
 ```console
