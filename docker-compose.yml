@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  db_hitalent:
+    image: postgres:16
+    container_name: db_hitalent
+    restart: unless-stopped
+    ports:
+      - "5440:5432"
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${DB_POSTGRES_PASSWORD}
+    volumes:
+      - db_hitalent:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_POSTGRES_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  hitalent_app:
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    container_name: hitalent_app
+    ports:
+      - "8000:8000"
+    environment:
+      DB_HOST: db_hitalent
+      DB_NAME: ${DB_NAME}
+      DB_POSTGRES_USER: ${DB_POSTGRES_USER}
+      DB_POSTGRES_PASSWORD: ${DB_POSTGRES_PASSWORD}
+      DB_PORT: 5432
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app
+    depends_on:
+      db_hitalent:
+        condition: service_healthy
+
+volumes:
+  db_hitalent:

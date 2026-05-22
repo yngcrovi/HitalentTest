@@ -1,0 +1,1 @@
+from .department import route as department
